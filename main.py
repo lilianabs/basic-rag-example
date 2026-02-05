@@ -1,3 +1,6 @@
-from fastapi import FastAPI
+def main():
+    print("Hello from basic-rag-example!")
 
-print("API")
+
+if __name__ == "__main__":
+    main()
