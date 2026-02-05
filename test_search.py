@@ -31,6 +31,10 @@ for query in queries:
         n_results=3
     )
     
+    print("Results")
+    print(results)
+    print("=" * 51)
+    
     for i, doc in enumerate(results['documents'][0]):
         score = results['distances'][0][i]
         print(f"  Result {i+1}: {doc} (Score: {score})")
