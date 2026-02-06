@@ -1,6 +1,12 @@
 import chromadb
-from sentence_transformers import SentenceTransformer
+import os
+from dotenv import load_dotenv
 from openai import OpenAI
+from sentence_transformers import SentenceTransformer
+
+load_dotenv()
+
+API_KEY = os.getenv("OPENAI_API_KEY")
 
 def get_client_vectordb():
     client_vectordb = chromadb.PersistentClient(
@@ -38,12 +44,7 @@ def generate_answer(query, context):
             input=formatted_prompt
         )
         
-        output_text = ""
-        for item in response.output:
-            if hasattr(item, "content"):
-                for content in item.content:
-                    if hasattr(content, "text"):
-                        output_text += content.text
+        output_text = response.output_text
     
     except Exception as e:
         print(f"Error generating answer: {e}")
@@ -65,11 +66,13 @@ def run_rag_pipeline(query: str):
     
     print(f'Retrieving context for query: {query}')
     context = get_context(collection, model, query)
-    print(f"Retrieved context: {context}")
+    print(f"Retrieved context...")
     
-    
+    print("Generating answer...")
+    answer = generate_answer(query, context)
+    print("Answer generated!\n")
+    print(f"Answer: {answer}")
 
 if __name__ == "__main__":
     query = "¿Cómo puedo contratar una cuenta Básica BBVA?"
-    
     run_rag_pipeline(query)
