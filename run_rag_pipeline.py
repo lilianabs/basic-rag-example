@@ -1,5 +1,7 @@
 import chromadb
 import os
+import time
+from functools import wraps
 from dotenv import load_dotenv
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
@@ -7,6 +9,16 @@ from sentence_transformers import SentenceTransformer
 load_dotenv()
 
 API_KEY = os.getenv("OPENAI_API_KEY")
+
+def measure_latency(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        end = time.perf_counter()
+        print(f"{func.__name__} latency: {(end - start) * 1000:.2f}ms")
+        return result
+    return wrapper
 
 def get_client_vectordb():
     client_vectordb = chromadb.PersistentClient(
@@ -20,6 +32,7 @@ def get_embeddings_model():
     model = SentenceTransformer('jaimevera1107/all-MiniLM-L6-v2-similarity-es')
     return model
 
+@measure_latency
 def get_context(collection, model, query, n_results=3):
     query_embedding = model.encode(query).tolist()
     
@@ -29,6 +42,7 @@ def get_context(collection, model, query, n_results=3):
     )
     return "\n\n".join(context['documents'][0])
 
+@measure_latency
 def generate_answer(query, context):
     prompt = '''
     Eres un asistente útil que proporciona respuestas precisas basadas en el contexto proporcionado.
